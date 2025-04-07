@@ -1,4 +1,5 @@
-
+from gui.gui import main
+import flet
 
 if __name__ == "__main__":
-    print('first')
+    flet.app(target=main)
