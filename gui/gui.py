@@ -5,7 +5,7 @@ from controller.controller import Controller
 
 def main(page: ft.Page):
     # Configuração da página
-    page.title = "I.A Bittech System"
+    page.title = "I.A Bittech System 1.0.2"
     page.theme_mode = ft.ThemeMode.LIGHT
     page.padding = 30
     page.window_width = 800
