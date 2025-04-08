@@ -5,7 +5,7 @@ from controller.controller import Controller
 
 def main(page: ft.Page):
     # Configuração da página
-    page.title = "Extrator de Currículos Bittech V1.0.1"
+    page.title = "I.A Bittech System"
     page.theme_mode = ft.ThemeMode.LIGHT
     page.padding = 30
     page.window_width = 800
@@ -62,7 +62,7 @@ def main(page: ft.Page):
         # Mostrar indicador de progresso
         progress_ring.visible = True
         status_text.visible = True
-        status_text.value = "Processando currículos..."
+        status_text.value = "Processando informações..."
         process_button.disabled = True
         page.update()
 
@@ -99,8 +99,8 @@ def main(page: ft.Page):
     # Criação dos widgets
     header = ft.Container(
         content=ft.Column([
-            ft.Text("Extrator de Currículos", size=28, weight=ft.FontWeight.BOLD),
-            ft.Text("Extraia informações de currículos PDF e exporte para Excel", size=16, color=ft.colors.GREY_700)
+            ft.Text("I.A Bittech System", size=28, weight=ft.FontWeight.BOLD),
+            ft.Text("Gerador de Leads", size=16, color=ft.colors.GREY_700)
         ]),
         margin=ft.margin.only(bottom=20)
     )
@@ -172,7 +172,7 @@ def main(page: ft.Page):
                 "Selecionar Local",
                 icon=ft.icons.OUTPUT,
                 on_click=lambda _: output_picker.save_file(
-                    file_name="currículos_processados.xlsx",
+                    file_name="Leads Extraídos.xlsx",
                     allowed_extensions=["xlsx"]
                 ),
                 style=ft.ButtonStyle(
@@ -189,7 +189,7 @@ def main(page: ft.Page):
     status_text = ft.Text("", visible=False, size=14)
 
     process_button = ft.ElevatedButton(
-        "Processar Currículos",
+        "Iniciar Processamento da I.A",
         icon=ft.icons.PLAY_ARROW,
         on_click=process_files,
         disabled=True,
