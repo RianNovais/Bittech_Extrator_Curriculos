@@ -9,9 +9,9 @@ def main(page: ft.Page):
     page.theme_mode = ft.ThemeMode.LIGHT
     page.padding = 30
     page.window_width = 800
-    page.window_height = 600
-    page.window_resizable = False
-    page.window.maximizable = False
+    page.window_height = 700
+    page.window_resizable = True  # Permitir redimensionamento pode ser útil
+    page.window.maximizable = False  # Permitir maximizar
     page.window.center()
     page.update()
 
@@ -54,6 +54,12 @@ def main(page: ft.Page):
             process_button.disabled = False if selected_files and output_path else True
             page.update()
 
+    # Barra de progresso e textos de status
+    progress_bar = ft.ProgressBar(width=400, value=0, visible=False)
+    progress_text = ft.Text("", visible=False)
+    progress_ring = ft.ProgressRing(visible=False)
+    status_text = ft.Text("", visible=False, size=14)
+
     # Função para processar os PDFs
     def process_files(e):
         if not selected_files or not output_path:
@@ -61,14 +67,22 @@ def main(page: ft.Page):
 
         # Mostrar indicador de progresso
         progress_ring.visible = True
+        progress_bar.visible = True
+        progress_text.visible = True
         status_text.visible = True
         status_text.value = "Processando informações..."
         process_button.disabled = True
         page.update()
 
+        # Função de callback de progresso
+        def update_progress(current, total, percent):
+            progress_text.value = f"Processando arquivo {current+1} de {total} ({percent:.1f}%)"
+            progress_bar.value = percent / 100  # ProgressBar espera valor entre 0-1
+            page.update()
+
         try:
-            # Criar e executar o controlador
-            controller = Controller(selected_files, output_path)
+            # Criar e executar o controlador com callback de progresso
+            controller = Controller(selected_files, output_path, on_progress=update_progress)
             controller.process_pdfs()
 
             # Atualizar UI com sucesso
@@ -82,6 +96,8 @@ def main(page: ft.Page):
 
         # Restaurar UI
         progress_ring.visible = False
+        progress_bar.visible = False
+        progress_text.visible = False
         process_button.disabled = False
         page.update()
 
@@ -102,13 +118,13 @@ def main(page: ft.Page):
             ft.Text("I.A Bittech System", size=28, weight=ft.FontWeight.BOLD),
             ft.Text("Gerador de Leads", size=16, color=ft.colors.GREY_700)
         ]),
-        margin=ft.margin.only(bottom=20)
+        margin=ft.margin.only(bottom=15)  # Reduzido o espaçamento
     )
 
-    # Área de arquivos
+    # Área de arquivos - altura reduzida para economizar espaço
     file_list = ft.Column(
         scroll=ft.ScrollMode.AUTO,
-        height=150,
+        height=120,  # Reduzido de 150 para 120
         spacing=5
     )
 
@@ -123,7 +139,7 @@ def main(page: ft.Page):
                 content=file_list,
                 border=ft.border.all(1, ft.colors.GREY_300),
                 border_radius=8,
-                padding=15,
+                padding=10,  # Reduzido padding de 15 para 10
                 expand=True
             ),
             ft.Row([
@@ -137,7 +153,7 @@ def main(page: ft.Page):
                     style=ft.ButtonStyle(
                         bgcolor=ft.colors.GREEN_50,
                         shape=ft.RoundedRectangleBorder(radius=6),
-                        padding=ft.padding.only(left=15, right=15, top=12, bottom=12)
+                        padding=ft.padding.only(left=15, right=15, top=10, bottom=10)  # Reduzido padding
                     )
                 ),
                 ft.ElevatedButton(
@@ -148,12 +164,12 @@ def main(page: ft.Page):
                         bgcolor=ft.colors.RED_100,
                         color=ft.colors.RED_700,
                         shape=ft.RoundedRectangleBorder(radius=6),
-                        padding=ft.padding.only(left=15, right=15, top=12, bottom=12)
+                        padding=ft.padding.only(left=15, right=15, top=10, bottom=10)  # Reduzido padding
                     )
                 )
             ])
         ]),
-        margin=ft.margin.only(bottom=20)
+        margin=ft.margin.only(bottom=15)  # Reduzido o espaçamento
     )
 
     # Área de saída
@@ -165,7 +181,7 @@ def main(page: ft.Page):
                 content=output_text,
                 border=ft.border.all(1, ft.colors.GREY_300),
                 border_radius=8,
-                padding=15,
+                padding=10,  # Reduzido padding
                 width=page.width - 80
             ),
             ft.ElevatedButton(
@@ -177,17 +193,14 @@ def main(page: ft.Page):
                 ),
                 style=ft.ButtonStyle(
                     shape=ft.RoundedRectangleBorder(radius=6),
-                    padding=ft.padding.only(left=15, right=15, top=12, bottom=12)
+                    padding=ft.padding.only(left=15, right=15, top=10, bottom=10)  # Reduzido padding
                 )
             )
         ]),
-        margin=ft.margin.only(bottom=20)
+        margin=ft.margin.only(bottom=15)  # Reduzido o espaçamento
     )
 
-    # Área de processamento
-    progress_ring = ft.ProgressRing(visible=False)
-    status_text = ft.Text("", visible=False, size=14)
-
+    # Botão de processamento
     process_button = ft.ElevatedButton(
         "Iniciar Processamento da I.A",
         icon=ft.icons.PLAY_ARROW,
@@ -195,44 +208,47 @@ def main(page: ft.Page):
         disabled=True,
         style=ft.ButtonStyle(
             color={
-                "": ft.colors.WHITE,  # estado normal
-                "disabled": ft.colors.WHITE  # cor do texto quando desabilitado
+                "": ft.colors.WHITE,
+                "disabled": ft.colors.WHITE
             },
             bgcolor={
-                "": ft.colors.BLUE,  # fundo normal
-                "disabled": ft.colors.BLUE_GREY_200  # fundo quando desabilitado
+                "": ft.colors.BLUE,
+                "disabled": ft.colors.BLUE_GREY_200
             },
             shape=ft.RoundedRectangleBorder(radius=8),
             padding=ft.padding.only(left=20, right=20, top=15, bottom=15)
         )
     )
 
+    # Área de processamento - centralizada
     process_section = ft.Container(
-        content=ft.Row([
-            process_button,
-            progress_ring,
-            status_text
-        ], alignment=ft.MainAxisAlignment.CENTER, spacing=10),
+        content=ft.Column([
+            ft.Row([
+                process_button,
+                progress_ring,
+                status_text
+            ], alignment=ft.MainAxisAlignment.CENTER, spacing=10),
+            ft.Container(
+                content=ft.Column([
+                    progress_bar,
+                    progress_text
+                ],
+                alignment=ft.MainAxisAlignment.CENTER,
+                horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+                spacing=5),
+                alignment=ft.alignment.center,
+                width=page.width - 60  # Definir largura completa
+            )
+        ]),
         alignment=ft.alignment.center,
-        margin=ft.margin.only(top=20)
+        margin=ft.margin.only(top=15)  # Reduzido o espaçamento
     )
 
-    # Footer
-    footer = ft.Container(
-        content=ft.Text("© 2025",
-                        size=12,
-                        color=ft.colors.GREY_500),
-        margin=ft.margin.only(top=30),
-        alignment=ft.alignment.center
-    )
-
-    # Montagem da interface
+    # Montagem da interface - removido o rodapé com "2025"
     page.add(
         header,
         file_section,
         output_section,
-        ft.Divider(),
-        process_section,
-        footer
+        ft.Divider(height=5),  # Reduzido altura do divisor
+        process_section
     )
-
